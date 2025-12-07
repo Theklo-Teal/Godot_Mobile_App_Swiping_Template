@@ -6,8 +6,6 @@ Other projects:
 - [The Github for source codes and portfolio](https://github.com/Theklo-Teal)
 - [Ko-fi is where I'll accept donations](https://ko-fi.com/paracortical)
 
-![Screenshot of dual_slider_demo.png](documentation/dual_slider_demo.png)
-
 # DESCRIPTION
 A template for the Godot Engine, for mobile apps where you can navigate different pages or menus by swiping left or right. Each page is represented as a "Card".
 
