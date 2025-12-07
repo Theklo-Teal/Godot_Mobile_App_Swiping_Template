@@ -1,0 +1,127 @@
+[gd_scene load_steps=3 format=3 uid="uid://dae15gqr2khle"]
+
+[ext_resource type="PackedScene" uid="uid://bq6vnk4xx0tnd" path="res://cards/base_card.tscn" id="1_v4o0i"]
+
+[sub_resource type="GDScript" id="GDScript_elk2j"]
+script/source = "extends HBoxContainer
+
+## This script is only supposed to handle how to swipe the cards.
+
+signal card_swipe(from:Card, to:Card)
+
+@export var swipe_cam : Camera2D ## The camera that is moved to display a card.
+@export var initial_card : NodePath ## The card that is first shown when the application starts.
+
+var curr_card : int
+var screen_dimens : Vector2
+
+func _ready() -> void:
+	screen_dimens = get_viewport_rect().size
+	call_deferred(\"goto_card_idx\", get_card_idx(initial_card))
+
+
+var is_dragging : bool
+var drag_start : Vector2
+var cam_start : Vector2
+var drag_vect : Vector2
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and is_dragging:
+		drag_vect = event.global_position - drag_start
+		swipe_cam.global_position.x = -drag_vect.x + cam_start.x
+	
+	if event is InputEventMouseButton and not event.is_echo():
+		if get_card().lock_swipe:
+			return
+		is_dragging = event.is_pressed()
+		if event.is_pressed():  # Start dragging
+			drag_start = event.global_position
+			cam_start = swipe_cam.global_position
+		else:  # Switch to the next closest card
+			var last_card = curr_card
+			if drag_vect.x > screen_dimens.x * 0.50:
+				curr_card -= 1
+			elif drag_vect.x < screen_dimens.x * -0.50:
+				curr_card += 1
+			curr_card = clamp(curr_card, 0, card_count() - 1)
+			card_swipe.emit( get_card(last_card) , get_card(curr_card))
+			goto_card_idx(curr_card)
+
+
+## Get card from the visible set, from an idx. Negative number returns currently viewed card.
+func get_card(idx:int = -1) -> Card:
+	if idx < 0:
+		idx = curr_card
+	var n : int = 0
+	var card : Card
+	for each in get_children():
+		if each.visible and each is Card:
+			if n == idx:
+				card = each
+				break
+			n += 1
+	return card
+
+## Return a list of all Card instances that are visible.
+func get_cards() -> Array[Card]:
+	var cards : Array[Card]
+	for each in get_children():
+		if each.visible and each is Card:
+			cards.append(each)
+	return cards
+
+## How many visible cards are there?
+func card_count() -> int:
+	var count : int = 0
+	for each in get_children():
+		if each.visible and each is Card:
+			count += 1
+	return count
+
+## Get idx of a card name from the ones that are visible
+func get_card_idx(card:String) -> int:
+	var idx : int = 0
+	for each in get_children():
+		if each.visible and each is Card:
+			if each.name == card:
+				break
+			idx += 1
+	return idx
+
+## Go to visible card
+func goto_card_idx(idx:int):
+	var tween = create_tween()
+	tween.bind_node(swipe_cam)
+	tween.set_trans(Tween.TRANS_SPRING)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(swipe_cam, \"global_position\", get_card_position(idx), 0.5).from_current()
+
+## What is the global coordinate of the top left corner of a card.
+func get_card_position(card_idx : int) -> Vector2:
+	return Vector2(card_idx * screen_dimens.x, 0)
+"
+
+[node name="Main_Scene" type="Node"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="Cardset" type="HBoxContainer" parent="." node_paths=PackedStringArray("swipe_cam")]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 3240.0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+script = SubResource("GDScript_elk2j")
+swipe_cam = NodePath("../Camera2D")
+initial_card = NodePath("Card2")
+
+[node name="Card1" parent="Cardset" instance=ExtResource("1_v4o0i")]
+layout_mode = 2
+
+[node name="Card2" parent="Cardset" instance=ExtResource("1_v4o0i")]
+layout_mode = 2
+
+[node name="Card3" parent="Cardset" instance=ExtResource("1_v4o0i")]
+layout_mode = 2

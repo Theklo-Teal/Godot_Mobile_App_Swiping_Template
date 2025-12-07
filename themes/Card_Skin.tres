@@ -1,0 +1,15 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://bou4qh2apwfme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_etddi"]
+content_margin_left = 18.0
+content_margin_top = 18.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+bg_color = Color(0.196809, 0.23876, 0.473042, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[resource]
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_etddi")
