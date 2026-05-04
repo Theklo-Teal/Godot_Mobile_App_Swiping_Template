@@ -17,6 +17,7 @@ var screen_dimens : Vector2
 
 func _ready() -> void:
 	screen_dimens = get_viewport_rect().size
+	custom_minimum_size.x = screen_dimens.x * get_child_count()
 	call_deferred(\"goto_card_idx\", get_card_idx(initial_card))
 
 
@@ -45,6 +46,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				curr_card += 1
 			curr_card = clamp(curr_card, 0, card_count() - 1)
 			card_swipe.emit( get_card(last_card) , get_card(curr_card))
+			get_card(last_card)._exit_card()
+			get_card(curr_card)._enter_card()
 			goto_card_idx(curr_card)
 
 
